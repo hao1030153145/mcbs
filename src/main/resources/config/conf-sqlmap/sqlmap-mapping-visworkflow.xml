@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Fri Feb 20 23:34:39 CST 2015-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="visWorkFlowMapper">
+    <!-- TODO: 在这里定义各种sql语句，用法请参考iBATIS文档 -->
+
+    <select id="getVisWorkFlowListByIdFlowDetailId" resultType="com.transing.dpmbs.integration.bo.VisWorkFlowBO" parameterType="java.lang.Integer" >
+        select id, flow_detail_id, filed_id, filed_en_name, is_customed, filed_type, filed_cn_name,storage_type_table
+        from work_flow_output_filed
+        where flow_detail_id = #{flowDetailId}
+    </select>
+    <insert id="addWorkFlowOutputFiled" parameterType="com.transing.dpmbs.integration.bo.VisWorkFlowBO">
+        insert into work_flow_output_filed
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test ="flowDetailId != null">
+              flow_detail_id,
+            </if>
+            <if test ="filedId != null">
+                filed_id,
+            </if>
+            <if test ="filedEnName != null">
+                filed_en_name,
+            </if>
+            <if test ="filedType != null">
+                filed_type,
+            </if>
+            <if test ="isCustomed != null">
+                is_customed,
+            </if>
+            <if test ="filedCnName != null">
+                filed_cn_name,
+            </if>
+            <if test ="storageTypeTable != null">
+                storage_type_table,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test ="flowDetailId != null">
+                #{flowDetailId},
+            </if>
+            <if test ="filedId != null">
+                #{filedId},
+            </if>
+            <if test ="filedEnName != null">
+                #{filedEnName},
+            </if>
+            <if test ="filedType != null">
+                #{filedType},
+            </if>
+            <if test ="isCustomed != null">
+                #{isCustomed},
+            </if>
+            <if test ="filedCnName != null">
+                #{filedCnName},
+            </if>
+            <if test ="storageTypeTable != null">
+                #{storageTypeTable},
+            </if>
+        </trim>
+    </insert>
+    <delete id="deleteWorkFlowOutputFiledByDetailId" parameterType="java.lang.Long">
+        delete from work_flow_output_filed where flow_detail_id = #{flowDetalId}
+    </delete>
+
+    <select id="getWorkFlowTemplateOutputFiledList" resultType="com.transing.dpmbs.integration.bo.TemplateOutputFiledBO" parameterType="java.lang.Integer" >
+        select id, flow_id, filed_id, filed_en_name, is_customed, filed_type, filed_cn_name,storage_type_table
+        from work_flow_template_output_filed
+        where flow_id = #{flowId}
+    </select>
+
+    <insert id="addWorkFlowTemplateOutputFiled" parameterType="com.transing.dpmbs.integration.bo.TemplateOutputFiledBO">
+        insert into work_flow_template_output_filed
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test ="flowId != null">
+                flow_id,
+            </if>
+            <if test ="filedId != null">
+                filed_id,
+            </if>
+            <if test ="filedEnName != null">
+                filed_en_name,
+            </if>
+            <if test ="filedType != null">
+                filed_type,
+            </if>
+            <if test ="isCustomed != null">
+                is_customed,
+            </if>
+            <if test ="filedCnName != null">
+                filed_cn_name,
+            </if>
+            <if test ="storageTypeTable != null">
+                storage_type_table,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test ="flowId != null">
+                #{flowId},
+            </if>
+            <if test ="filedId != null">
+                #{filedId},
+            </if>
+            <if test ="filedEnName != null">
+                #{filedEnName},
+            </if>
+            <if test ="filedType != null">
+                #{filedType},
+            </if>
+            <if test ="isCustomed != null">
+                #{isCustomed},
+            </if>
+            <if test ="filedCnName != null">
+                #{filedCnName},
+            </if>
+            <if test ="storageTypeTable != null">
+                #{storageTypeTable},
+            </if>
+        </trim>
+    </insert>
+    <delete id="delWorkFlowTemplateOutputFiled" parameterType="java.lang.Long">
+        delete from work_flow_template_output_filed where flow_id = #{flowId}
+    </delete>
+
+
+</mapper>

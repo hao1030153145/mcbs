@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Fri Feb 20 23:34:39 CST 2015-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="storageMapper">
+    <select id="getStorageBOByFilter" parameterType="com.transing.dpmbs.web.filter.StorageFilter" resultType="com.transing.dpmbs.integration.bo.StorageBO">
+     select id,storage_name,storage_type,create_time from storage where 1=1
+     <if test="storageName != null and storageName != ''">
+         and storage_name like '%${storageName}%'
+     </if>
+    <if test="storageType != null and storageType != ''">
+        and storage_type = #{storageType}
+    </if>
+    <if test="sort != null and sort != ''">
+        order by ${sort}
+    </if>
+        limit #{page},#{pageSize}
+    </select>
+
+    <select id="getCountByStorageName" resultType="java.lang.Long" parameterType="java.lang.String">
+        select count(id) from storage where storage_name = #{storageName}
+    </select>
+
+    <insert id="addStorage" parameterType="com.transing.dpmbs.integration.bo.StorageBO" useGeneratedKeys="true" keyProperty="id">
+        insert into storage
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="storageName !=null and storageName !=''">
+                storage_name,
+            </if>
+            <if test="storageType !=null and storageType !=''">
+                storage_type,
+            </if>
+            <if test="keyId !=null and keyId !=''">
+                key_id,
+            </if>
+            <if test="password !=null and password !=''">
+                password,
+            </if>
+            <if test="storageAddress !=null and storageAddress !=''">
+                storage_address,
+            </if>
+            <if test="path !=null and path !=''">
+                path,
+            </if>
+            create_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="storageName !=null and storageName !=''">
+                #{storageName},
+            </if>
+            <if test="storageType !=null and storageType != ''">
+                #{storageType},
+            </if>
+            <if test="keyId !=null and keyId != ''">
+                #{keyId},
+            </if>
+            <if test="password !=null and password != ''">
+               #{password},
+            </if>
+            <if test="storageAddress!=null and storageAddress != ''">
+                #{storageAddress},
+            </if>
+            <if test="path !=null and path != ''">
+                #{path},
+            </if>
+            now()
+        </trim>
+    </insert>
+    <select id="getStorageById" resultType="com.transing.dpmbs.integration.bo.StorageBO" parameterType="java.lang.Long">
+        select id,storage_name,storage_type,key_id,password,storage_address,path from storage where id = #{id}
+    </select>
+    <update id="updateStorage" parameterType="com.transing.dpmbs.integration.bo.StorageBO">
+        update storage
+        <set>
+            <if test="storageName !=null and storageName !=''">
+                storage_name = #{storageName},
+            </if>
+            <if test="storageType !=null and storageType != ''">
+                storage_type = #{storageType},
+            </if>
+            <if test="keyId !=null and keyId != ''">
+                key_id = #{keyId},
+            </if>
+            <if test="password != null and password != ''">
+                password = #{password},
+            </if>
+            <if test="storageAddress != null and storageAddress != ''">
+                storage_address = #{storageAddress},
+            </if>
+            <if test="path != null and path != ''">
+                path = #{path}
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <delete id="delStorageById" parameterType="java.lang.Long">
+        delete from storage where id = #{storageId};
+    </delete>
+
+    <select id="getAllStorage" resultType="com.transing.dpmbs.integration.bo.StorageBO">
+        select id,storage_name,storage_type,key_id,password,storage_address,path from storage
+    </select>
+</mapper>

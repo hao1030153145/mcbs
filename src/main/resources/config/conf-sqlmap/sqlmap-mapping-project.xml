@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Fri Feb 20 23:34:39 CST 2015-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="projectMapper">
+    <!--,manager,customer,start_time,end_time,status,type-->
+    <select id="getProjectList" parameterType="com.transing.dpmbs.web.filter.ProjectFilter"
+            resultType="com.transing.dpmbs.integration.bo.Project">
+        SELECT id,name,describes,manager,customer,start_time,end_time,status,type,project_type FROM project
+        WHERE
+        isdelete = 0 and project_type=#{projectType}
+        <if test="name != null and name!=''">
+            AND name like #{name}
+        </if>
+        <if test="describes != null and describes!=''">
+            AND describes=#{describes}
+        </if>
+        <if test="manager != null and manager!=''">
+            AND manager=#{manager}
+        </if>
+        <if test="customer != null and customer!=''">
+            AND customer=#{customer}
+        </if>
+        <if test="status != null and status!=''">
+            AND status in (${status})
+        </if>
+        <if test="type != null and type!=''">
+            AND type=#{type}
+        </if>
+        <if test="startTime != null and startTime!=''">
+            <![CDATA[AND startTime>#{startTime}]]>
+        </if>
+        <if test="endTime != null and endTime!=''">
+            <![CDATA[AND endTime<#{endTime}]]>
+        </if>
+        <if test="sortStatus !=null and sortStatus!=''">
+            ORDER BY ${sortStatus}
+            <if test="direct!= null  and direct!=''">${direct}</if>
+        </if>
+        limit #{page}
+        <if test="size!= null  and size!=''">,#{size}</if>
+    </select>
+
+    <select id="getProjectListCount" parameterType="com.transing.dpmbs.web.filter.ProjectFilter"
+            resultType="java.lang.Long">
+        SELECT count(id) FROM project
+        WHERE
+        isdelete = 0 and project_type=#{projectType}
+        <if test="name != null and name!=''">
+            AND name like '%${name}%'
+        </if>
+        <if test="describes != null and describes!=''">
+            AND describes=#{describes}
+        </if>
+        <if test="manager != null and manager!=''">
+            AND manager=#{manager}
+        </if>
+        <if test="customer != null and customer!=''">
+            AND customer=#{customer}
+        </if>
+        <if test="status != null and status!=''">
+            AND status=#{status}
+        </if>
+        <if test="type != null and type!=''">
+            AND type=#{type}
+        </if>
+        <if test="startTime != null and startTime!=''">
+            <![CDATA[AND startTime>#{startTime}]]>
+        </if>
+        <if test="endTime != null and endTime!=''">
+            <![CDATA[AND endTime<#{endTime}]]>
+        </if>
+    </select>
+
+    <select id="getProjectManager"
+            resultType="com.transing.dpmbs.integration.bo.Manager">
+        SELECT id,username FROM user
+    </select>
+
+    <select id="getManager" parameterType="java.lang.String"
+            resultType="com.transing.dpmbs.integration.bo.Manager">
+        SELECT id,username FROM user
+        WHERE
+        id=#{_parameter}
+    </select>
+
+    <select id="getProjectInf" parameterType="java.lang.Long"
+            resultType="com.transing.dpmbs.integration.bo.Project">
+        SELECT id,name,describes,manager,customer,start_time,end_time,status,type,project_type FROM project
+        WHERE
+        isdelete = 0
+        AND id=#{projectId}
+    </select>
+
+    <select id="getCustomerList"
+            resultType="com.transing.dpmbs.integration.bo.Customer">
+        SELECT id,name FROM customer
+    </select>
+
+    <select id="getCustomer"
+            resultType="com.transing.dpmbs.integration.bo.Customer">
+        SELECT id,name FROM customer
+        WHERE
+        id=#{_parameter}
+    </select>
+
+    <select id="getStatusList"
+            resultType="com.transing.dpmbs.integration.bo.Status">
+        SELECT id,name FROM status
+    </select>
+
+    <select id="getType"
+            resultType="com.transing.dpmbs.integration.bo.Status">
+        SELECT id,name FROM status
+        WHERE
+        id=#{_parameter}
+    </select>
+
+    <select id = "getTypeNoByProjectId" parameterType="java.lang.Long" resultType="java.lang.String">
+        select type_no from project_job_type where project_Id=#{projectId}
+    </select>
+
+    <select id="getVisualizationBOListByProjectId" parameterType="java.lang.Long" resultType="com.transing.dpmbs.integration.bo.VisualizationBO">
+        select id,name,project_id,create_time,lastmodify_time,image from visualization where project_Id=#{projectId}
+    </select>
+    <insert id="createProject" parameterType="com.transing.dpmbs.web.filter.ProjectCreateFilter"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        INSERT INTO project (name, describes,manager,customer,start_time,end_time,status,type,create_time,lastmodify_time,project_type)
+        VALUES (#{projectName},#{projectDescribe},#{managerId},#{customerId},#{startTime},#{endTime},
+        <choose>
+            <when test="null == status">0</when>
+            <when test="null != status">#{status}</when>
+        </choose>
+        ,#{typeId},now(),now(),#{projectType});
+    </insert>
+
+    <update id="updateProject" parameterType="com.transing.dpmbs.web.filter.ProjectCreateFilter"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        update project
+        <set>
+            <if test="null != projectName and projectName!=''">
+                name = #{projectName},
+            </if>
+            <if test="null != projectDescribe and projectDescribe!=''">
+                describes = #{projectDescribe},
+            </if>
+            <if test="null != managerId and managerId!=''">
+                manager = #{managerId},
+            </if>
+            <if test="null != customerId and customerId!=''">
+                customer = #{customerId},
+            </if>
+            <if test="null != startTime and startTime!=''">
+                start_time = #{startTime},
+            </if>
+            <if test="null != endTime and endTime!=''">
+                end_time = #{endTime},
+            </if>
+            <if test="null != typeId and typeId!=''">
+                type = #{typeId},
+            </if>
+            lastmodify_time = now()
+        </set>
+        where id = #{id}
+    </update>
+
+    <select id="selectProject" parameterType="java.lang.String"
+            resultType="java.lang.Long">
+        SELECT count(id) FROM project WHERE name=#{_parameter} and isdelete != 1
+    </select>
+
+    <update id="updateDelProject" parameterType="java.lang.Long">
+        update project set isdelete = 1 where id = #{id}
+    </update>
+
+    <update id="startProject" parameterType="java.lang.Long">
+        update project set status = 3 where id = #{id}
+    </update>
+
+    <update id="stopProject" parameterType="java.lang.Long">
+        update project set status = 4 where id = #{id}
+    </update>
+
+    <update id="updateProjectStatus" parameterType="com.transing.dpmbs.web.filter.ProjectStatusFilter">
+        update project set status = #{status} where id = #{id}
+    </update>
+
+    <delete id="deleteProjectByProjectId" parameterType="java.lang.Long">
+        delete from project where id = #{projectId}
+    </delete>
+</mapper>

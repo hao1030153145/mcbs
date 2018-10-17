@@ -1,0 +1,552 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Fri Feb 20 23:34:39 CST 2015-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="workFlowTemplateMapper">
+    <!-- TODO: 在这里定义各种sql语句，用法请参考iBATIS文档 -->
+
+    <select id="getWorkFlowTemplateListById" resultType="com.transing.workflow.integration.bo.WorkFlowTemplateBO" parameterType="java.lang.Integer" >
+        select id, name, status, process, flow_type, create_time, lastmodify_time,img_url
+        from work_flow_template
+        where id = #{id}
+    </select>
+
+    <select id="getVisTemplateNameList" resultType="java.lang.String">
+        SELECT name
+        FROM work_flow_template
+        WHERE flow_type = "workFlow" AND is_delete = "0"
+    </select>
+
+    <!--根据查询条件来查询分页的非可视话模板列表条件是flow_type = "crawl"-->
+    <select id="getWorkFlowTemplateListByParam" resultType="com.transing.workflow.integration.bo.WorkFlowTemplateBO" parameterType="java.util.Map" >
+        select id, name, status, process, flow_type, create_time, lastmodify_time
+        from work_flow_template
+        WHERE  flow_type = "crawl" AND is_delete = "0"
+
+        <if test="null != status">
+          AND  status = #{status}
+        </if>
+
+        <if test="null != name and ''!=name">
+          AND  name like '%${name}%'
+        </if>
+
+        <if test="null != page and '' != page">
+            limit #{page}
+            <if test="size!= null  and size!=''">,#{size}</if>
+        </if>
+    </select>
+
+    <!--根据模板名称查看该模板是否存在-->
+    <select id="getVisWorkFlowTemplateIsExistingByName" parameterType="java.lang.String" resultType="java.lang.Integer">
+        SELECT COUNT(id)
+        FROM work_flow_template
+        where flow_type = "workFlow" AND is_delete = "0" AND name = #{name}
+    </select>
+
+    <!--根据查询条件来查询分页的可视化模板列表，可视化模板的条件是flow_type = "flow_work " -->
+    <select id="getVisWorkFlowTemplateListByParam" resultType="com.transing.workflow.integration.bo.WorkFlowTemplateBO" parameterType="java.util.Map">
+        select id, name, status, process, flow_type, create_time, lastmodify_time, img_url
+        from work_flow_template
+        WHERE  flow_type = "workFlow" AND is_delete = "0"
+
+        <if test="null != status">
+          AND   status = #{status}
+        </if>
+
+        <if test="null != name and ''!=name">
+          AND  name like '%${name}%'
+        </if>
+
+        <if test="null != createTime">
+            <![CDATA[ and create_time >= #{createTime,jdbcType=TIMESTAMP}  ]]>
+        </if>
+
+        <if test="null != endTime">
+            <![CDATA[ and create_time <= #{endTime,jdbcType=TIMESTAMP}  ]]>
+        </if>
+        ORDER BY create_time DESC
+        limit #{page},#{size}
+       <!-- <if test="null != page and 0 != page">
+            limit #{page}
+            <if test="size!= null  and size!=''">,#{size}</if>
+        </if>-->
+    </select>
+
+    <!--根据查询条件来查询分页的非可视话模板列表数目，非可视化模板的条件是flow_type = "crawl"-->
+    <select id="getWorkFlowTemplateCountByParam" resultType="java.lang.Integer" parameterType="java.util.Map" >
+        select count(id)
+        from work_flow_template
+        WHERE flow_type = "crawl" AND is_delete = "0"
+
+        <if test="null != status">
+           AND status = #{status}
+        </if>
+
+        <if test="null != name and ''!= name">
+           AND  name like '%${name}%'
+        </if>
+
+    </select>
+    <!--根据查询条件来查询分页的可视化模板列表数目，可视化模板的条件是flow_type = "flow_work " -->
+    <select id="getVisWorkFlowTemplateCountByParam" resultType="java.lang.Integer" parameterType="java.util.Map" >
+        select count(id)
+        from work_flow_template
+        WHERE flow_type = "workFlow" AND is_delete = "0"
+
+        <if test="null != status">
+           AND  status = #{status}
+        </if>
+
+        <if test="null != name and ''!= name">
+           AND name like '%${name}%'
+        </if>
+
+        <if test="null != createTime">
+            <![CDATA[ and create_time >= #{createTime,jdbcType=TIMESTAMP}  ]]>
+        </if>
+
+        <if test="null != endTime">
+            <![CDATA[ and create_time <= #{endTime,jdbcType=TIMESTAMP}  ]]>
+        </if>
+
+
+        <!--<if test="null != createTime">
+            AND DATE_FORMAT(create_time,"%Y-%m-%d") = #{createTime}
+        </if>-->
+
+    </select>
+
+    <!--根据传过来的id集合来批量修改表中的isDelete字段为1，做到逻辑删除-->
+    <update id="logicDeleteVisWorkFlowTemplateByIds" parameterType="java.util.List">
+        UPDATE work_flow_template
+        SET is_delete = 1
+        where id in
+        <foreach collection="list" item="id" open="  (" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!--根据查询条件获得不分页并未被逻辑删除的模板列表-->
+    <select id="getWorkFlowTemplateListByCondition" resultType="com.transing.dpmbs.web.po.WorkFlowTemplatePO" parameterType="java.util.Map" >
+        select id, name, status, process, flow_type, create_time, lastmodify_time, is_delete , img_url
+        from work_flow_template
+        WHERE is_delete = 0 and flow_type = "workFlow"
+
+        <if test="null != status">
+               AND status = #{status}
+            </if>
+
+            <if test="null != name and ''!=name">
+               AND name like '%${name}%'
+            </if>
+
+            <if test="null != createTime and '' != createTime">
+               AND DATE_FORMAT(create_time,"%Y-%m-%d") = #{createTime}
+            </if>
+    </select>
+
+    <!--根据查询条件获得模板的数目-->
+    <select id="getWorkFlowTemplateCountByCondition" resultType="java.lang.Integer" parameterType="java.util.Map" >
+        select count(id)
+        from work_flow_template
+        WHERE is_delete = 0
+
+            <if test="null != status">
+                and  status = #{status}
+            </if>
+
+            <if test="null != name and ''!= name">
+                AND  name like '%${name}%'
+            </if>
+
+            <if test="null != createTime and '' != createTime">
+                AND DATE_FORMAT(create_time,"%Y-%m-%d") = #{createTime}
+            </if>
+    </select>
+
+    <insert id="addWorkFlowTemplate" parameterType="com.transing.workflow.integration.bo.WorkFlowTemplateBO" useGeneratedKeys="true" keyProperty="id" >
+        insert into work_flow_template
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="name != null" >
+                name,
+            </if>
+            <if test="status != null" >
+                status,
+            </if>
+            <if test="process != null" >
+                process,
+            </if>
+            <if test="flowType != null" >
+                flow_type,
+            </if>
+            <if test="createTime != null" >
+                create_time,
+            </if>
+            <if test="lastmodifyTime != null" >
+                lastmodify_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="name != null" >
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null" >
+                #{status,jdbcType=INTEGER},
+            </if>
+            <if test="process != null" >
+                #{process,jdbcType=VARCHAR},
+            </if>
+            <if test="flowType != null" >
+                #{flowType,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastmodifyTime != null" >
+                #{lastmodifyTime,jdbcType=TIMESTAMP},
+            </if>
+        </trim>
+    </insert>
+
+    <select id="getWorkFlowNodeListByTemplateId" resultType="com.transing.workflow.integration.bo.WorkFlowNodeBO" parameterType="java.lang.Integer" >
+        select flow_id, template_id, pre_flow_id_ids, next_flow_id_ids, type_no, name, created_by, created_time,updated_by, updated_time,node_param,node_info,is_save,job_status
+        from work_flow_node
+        where template_id = #{templateId}
+        ORDER BY pre_flow_id_ids ASC
+    </select>
+
+    <insert id="addWorkFlowNode" parameterType="com.transing.workflow.integration.bo.WorkFlowNodeBO" useGeneratedKeys="true" keyProperty="flowId" >
+        insert into work_flow_node
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="templateId != null" >
+                template_id,
+            </if>
+
+            <if test="flowId != null" >
+                flow_id,
+            </if>
+            <if test="preFlowIdIds != null" >
+                pre_flow_id_ids,
+            </if>
+            <if test="nextFlowIdIds != null" >
+                next_flow_id_ids,
+            </if>
+            <if test="typeNo != null" >
+                type_no,
+            </if>
+            <if test="name != null" >
+                name,
+            </if>
+            <if test="createdBy != null" >
+                created_by,
+            </if>
+            <if test="createdTime != null" >
+                created_time,
+            </if>
+            <if test="updatedBy != null" >
+                updated_by,
+            </if>
+            <if test="updatedTime != null" >
+                updated_time,
+            </if>
+            <if test="nodeParam != null" >
+                node_param,
+            </if>
+            <if test="nodeInfo !=null">
+                node_info,
+            </if>
+            <if test="isSave != null">
+                is_save,
+            </if>
+            <if test="jobStatus != null">
+                job_status
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="templateId != null" >
+                #{templateId,jdbcType=BIGINT},
+            </if>
+            <if test="preFlowIdIds != null" >
+                #{preFlowIdIds,jdbcType=VARCHAR},
+            </if>
+            <if test="nextFlowIdIds != null" >
+                #{nextFlowIdIds,jdbcType=VARCHAR},
+            </if>
+            <if test="typeNo != null" >
+                #{typeNo,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null" >
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="createdBy != null" >
+                #{createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="createdTime != null" >
+                #{createdTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                #{updatedBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updatedTime != null" >
+                #{updatedTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="nodeParam != null" >
+                #{nodeParam,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="nodeInfo !=null">
+                #{nodeInfo},
+            </if>
+            <if test="isSave != null">
+                #{isSave},
+            </if>
+            <if test="jobStatus != null">
+                #{jobStatus}
+            </if>
+        </trim>
+    </insert>
+
+
+    <update id="updateWorkFlowNode" parameterType="com.transing.workflow.integration.bo.WorkFlowNodeBO" >
+        update work_flow_node
+        <set >
+            <if test="templateId != null" >
+                template_id = #{templateId},
+            </if>
+            <if test="preFlowIdIds != null" >
+                pre_flow_id_ids = #{preFlowIdIds,jdbcType=VARCHAR},
+            </if>
+            <if test="nextFlowIdIds != null" >
+                next_flow_id_ids = #{nextFlowIdIds,jdbcType=VARCHAR},
+            </if>
+            <if test="typeNo != null" >
+                type_no = #{typeNo,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null" >
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="createdBy != null" >
+                created_by = #{createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="createdTime != null" >
+                created_time = #{createdTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null" >
+                updated_by = #{updatedBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updatedTime != null" >
+                updated_time = #{updatedTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="nodeParam != null" >
+                node_param = #{nodeParam,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="nodeInfo != null">
+                node_info = #{nodeInfo},
+            </if>
+            <if test="isSave != null">
+                is_save = #{isSave},
+            </if>
+            <if test="jobStatus != null">
+                job_status = #{jobStatus},
+            </if>
+        </set>
+        where flow_id = #{flowId,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateWorkTemplate" parameterType="com.transing.workflow.integration.bo.WorkFlowTemplateBO" >
+        update work_flow_template
+        <set >
+            <if test="name != null" >
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null" >
+                status = #{status,jdbcType=INTEGER},
+            </if>
+            <if test="process != null" >
+                process = #{process,jdbcType=VARCHAR},
+            </if>
+            <if test="flowType != null" >
+                flow_type = #{flowType,jdbcType=VARCHAR},
+            </if>
+            <if test="createTime != null" >
+                create_time = #{createTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="lastmodifyTime != null" >
+                lastmodify_time = #{lastmodifyTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="imgUrl != null" >
+                img_url = #{imgUrl},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteWorkFlowNodeByTemplateId" parameterType="java.lang.Integer" >
+        delete from work_flow_node
+        where template_id = #{templateId}
+    </delete>
+
+    <delete id="deleteWorkTemplateById" parameterType="java.lang.Integer" >
+        delete from work_flow_template
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <delete id ="deleteWorkFlowNodeByFlowId" parameterType="java.lang.Long">
+        delete from work_flow_node where flow_id = #{flowId}
+    </delete>
+
+    <delete id ="deleteWorkFlowTemplateNodeParamByFlowId" parameterType="java.lang.Long">
+        delete from work_flow_template_node_param where work_flow_node_id = #{flowId}
+    </delete>
+    <update id="updateWorkFlowTemplateNodeParam" parameterType="com.transing.workflow.integration.bo.WorkFlowTemplateNodeParamBo">
+         update work_flow_template_node_param
+        <set>
+            <if test="workFlowTemplateNodeId != null">
+                work_flow_node_id = #{workFlowTemplateNodeId},
+            </if>
+            <if test="templateId != null">
+                template_id = #{templateId},
+            </if>
+            <if test="typeNo != null">
+                type_no = #{typeNo},
+            </if>
+            <if test="typeNo != null">
+                type_no = #{typeNo},
+            </if>
+            <if test="createdBy != null">
+                created_by = #{createdBy},
+            </if>
+            <if test="createdDate != null">
+                created_date = #{createdDate},
+            </if>
+            <if test="updatedBy != null">
+                updated_by = #{updatedBy},
+            </if>
+            <if test="inputParamId != null">
+                input_param_id = #{inputParamId},
+            </if>
+            <if test="inputParamCnName != null">
+                input_param_cn_name = #{inputParamCnName},
+            </if>
+            <if test="inputParamType != null">
+                input_param_type = #{inputParamType},
+            </if>
+            <if test="inputParamValue != null">
+                input_param_value = #{inputParamValue},
+            </if>
+            <if test="config != null">
+                config = #{config},
+            </if>
+            updated_date = now()
+        </set>
+        where param_id = #{paramId}
+    </update>
+    <insert id="addWorkFlowTemplateNodeParam" parameterType="com.transing.workflow.integration.bo.WorkFlowTemplateNodeParamBo" useGeneratedKeys="true" keyProperty="paramId">
+        insert into work_flow_template_node_param
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="paramId != null" >
+                param_id,
+            </if>
+            <if test="workFlowTemplateNodeId != null">
+                work_flow_node_id,
+            </if>
+            <if test="templateId != null">
+                template_id,
+            </if>
+            <if test="typeNo != null" >
+                type_no,
+            </if>
+            <if test="createdBy != null" >
+                created_by,
+            </if>
+            <if test="updatedBy != null" >
+                updated_by,
+            </if>
+            <if test="inputParamId!= null" >
+                input_param_id,
+            </if>
+            <if test="inputParamCnName !=null">
+                input_param_cn_name,
+            </if>
+            <if test="inputParamType !=null">
+                input_param_type,
+            </if>
+            <if test="inputParamValue !=null">
+                input_param_value,
+            </if>
+            <if test="config !=null">
+                config,
+            </if>
+            created_date,
+            updated_date
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="paramId != null" >
+                #{paramId},
+            </if>
+            <if test="workFlowTemplateNodeId != null">
+                #{workFlowTemplateNodeId},
+            </if>
+            <if test="templateId != null">
+                #{templateId},
+            </if>
+            <if test="typeNo != null" >
+                #{typeNo},
+            </if>
+            <if test="createdBy != null" >
+                #{createdBy},
+            </if>
+            <if test="updatedBy != null" >
+                #{updatedBy},
+            </if>
+            <if test="inputParamId!= null" >
+                #{inputParamId},
+            </if>
+            <if test="inputParamCnName !=null">
+                #{inputParamCnName},
+            </if>
+            <if test="inputParamType !=null">
+                #{inputParamType},
+            </if>
+            <if test="inputParamValue !=null">
+                #{inputParamValue},
+            </if>
+            <if test="config !=null">
+                #{config},
+            </if>
+            now(),
+            now()
+        </trim>
+    </insert>
+    <select id="getWorkFlowTemplateNodeParamByFlowId" parameterType="java.lang.Long" resultType="com.transing.workflow.integration.bo.WorkFlowTemplateNodeParamBo">
+         select param_id,work_flow_node_id,template_id,type_no,created_by,created_date,updated_by,updated_date,input_param_id,input_param_cn_name,
+        input_param_type,input_param_value,config
+        FROM  work_flow_template_node_param
+        where work_flow_node_id = #{flowId}
+    </select>
+
+    <select id="getWorkFlowNodeListByTypeNoList" parameterType="java.util.Map"
+            resultType="com.transing.workflow.integration.bo.WorkFlowNodeBO">
+        SELECT  flow_id, template_id,
+        pre_flow_id_ids,next_flow_id_ids,type_no,node_param,name, created_by, created_time,
+        updated_by, updated_time, node_info,job_status
+        FROM work_flow_node
+        <where>
+            <if test="null != list and list.size > 0">
+                type_no in
+                <foreach collection="list" item="typeNo" index="index"
+                         open="(" close=")" separator=",">
+                    #{typeNo}
+                </foreach>
+            </if>
+            and template_id = #{templateId}
+        </where>
+    </select>
+
+    <select id="getWorkFlowDetailByFlowId" parameterType="java.lang.Long" resultType="com.transing.workflow.integration.bo.WorkFlowNodeBO">
+        SELECT  flow_id, template_id,
+        pre_flow_id_ids,next_flow_id_ids,type_no,node_param,name, created_by, created_time,
+        updated_by, updated_time, node_info, is_save,job_status
+        FROM work_flow_node where flow_id = #{preFlowIdIds}
+
+    </select>
+</mapper>

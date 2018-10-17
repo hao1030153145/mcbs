@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Fri Feb 20 23:34:39 CST 2015-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="dataSourceTypeMapper">
+    <!-- TODO: 在这里定义各种sql语句，用法请参考iBATIS文档 -->
+
+    <insert id="addDatasource" parameterType="com.transing.dpmbs.integration.bo.DatasourceBO"
+            useGeneratedKeys="true" keyProperty="datasourceId">
+        INSERT INTO datasource(datasource_id,datasource_name)
+        VALUES (#{datasourceId},#{datasourceName})
+    </insert>
+
+    <insert id="addDatasourceType" parameterType="com.transing.dpmbs.integration.bo.DatasourceTypeBO"
+            useGeneratedKeys="true" keyProperty="datasourceTypeId">
+        INSERT INTO datasource_type(datasource_id,datasource_type_id,datasource_type_name,storage_type_table,status,updated_time,updated_by,create_time)
+        VALUES (#{datasourceId},#{datasourceTypeId},#{datasourceTypeName},#{storageTypeTable},1,now(),#{updatedBy},now())
+    </insert>
+
+    <update id="updateDatasourceTypeStatus" parameterType="java.util.Map">
+        UPDATE datasource_type SET status = #{status},updated_time=now(),updated_by=#{updateBy} WHERE datasource_type_id = #{datasourceTypeId}
+    </update>
+
+    <update id="updateDatasourceTypeUp" parameterType="java.util.Map">
+        UPDATE datasource_type SET updated_time=now(),updated_by=#{updateBy} WHERE datasource_type_id = #{datasourceTypeId}
+    </update>
+
+    <select id="getDatasourceList" resultType="com.transing.dpmbs.integration.bo.DatasourceBO">
+        select datasource_id,datasource_name
+        from datasource
+    </select>
+
+    <select id="getDatasourceById" parameterType="java.lang.Integer" resultType="com.transing.dpmbs.integration.bo.DatasourceBO">
+        select datasource_id,datasource_name
+        from datasource
+        where datasource_id = #{datasourceId}
+    </select>
+
+    <select id="getDatasourceTypeCount" resultType="java.lang.Integer" parameterType="com.transing.dpmbs.web.filter.DatasourceTypeFilter">
+        SELECT count(datasource_type_id)
+        from datasource_type
+        <where>
+            <if test="null != datasourceId">
+                datasource_id = #{datasourceId}
+            </if>
+            <if test="null != datasourceTypeId">
+                and datasource_type_id = #{datasourceTypeId}
+            </if>
+            <if test="null != status">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <select id="getDatasourceTypeList" resultType="com.transing.dpmbs.integration.bo.DatasourceTypeBO" parameterType="com.transing.dpmbs.web.filter.DatasourceTypeFilter">
+        select datasource_type_id,datasource_id,datasource_type_name,storage_type_table,status,updated_time,updated_by
+        from datasource_type
+        <where>
+            <if test="null != datasourceId">
+                datasource_id = #{datasourceId}
+            </if>
+            <if test="null != datasourceTypeId">
+                and datasource_type_id = #{datasourceTypeId}
+            </if>
+            <if test="null != status">
+                and status = #{status}
+            </if>
+        </where>
+
+        <if test="sortStatus !=null and sortStatus!=''">
+            ORDER BY ${sortStatus}
+            <if test="direct!= null  and direct!=''">${direct}</if>
+        </if>
+
+        <if test="size != 0">
+            limit #{page},#{size}
+        </if>
+
+    </select>
+
+    <select id="getDataSourceTypeRelationList" parameterType="java.lang.String" resultType="com.transing.dpmbs.integration.bo.DataSourceTypeRelation">
+        SELECT  id,
+                data_source_type_id,
+                field_name,
+                field_annotation
+        FROM data_source_type_relation
+        WHERE
+        data_source_type_id = #{_parameter}
+    </select>
+
+    <select id="getDataSourceTypeById" parameterType="java.lang.Long" resultType="com.transing.dpmbs.integration.bo.DataSourceType">
+          SELECT id,
+                name,
+                out_table
+        FROM data_source_type
+        WHERE id=#{id}
+    </select>
+    
+</mapper>

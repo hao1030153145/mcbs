@@ -1,0 +1,42 @@
+package com.transing.dpmbs.util;
+
+import net.sf.json.JSON;
+import net.sf.json.JSONSerializer;
+import net.sf.json.xml.XMLSerializer;
+
+import javax.swing.text.Document;
+
+public class XmlExerciseUtil {
+    /**
+     * 将xml字符串<STRONG>转换</STRONG>为JSON字符串
+     *
+     * @param xmlString xml字符串
+     * @return JSON<STRONG>对象</STRONG>
+     */
+    public static String xml2json(String xmlString) {
+        XMLSerializer xmlSerializer = new XMLSerializer();
+        JSON json = xmlSerializer.read(xmlString);
+        return json.toString(1);
+    }
+
+    /**
+     * 将xmlDocument<STRONG>转换</STRONG>为JSON<STRONG>对象</STRONG>
+     *
+     * @param xmlDocument XML Document
+     * @return JSON<STRONG>对象</STRONG>
+     */
+    public static String xml2json(Document xmlDocument) {
+        return xml2json(xmlDocument.toString());
+    }
+
+    /**
+     * JSON(数组)字符串<STRONG>转换</STRONG>成XML字符串
+     *
+     * @param jsonString
+     * @return
+     */
+    public static String json2xml(String jsonString) {
+        XMLSerializer xmlSerializer = new XMLSerializer();
+        return xmlSerializer.write(JSONSerializer.toJSON(jsonString));
+    }
+}

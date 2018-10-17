@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Fri Feb 20 23:34:39 CST 2015-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="contentTypeMapper">
+    <!-- TODO: 在这里定义各种sql语句，用法请参考iBATIS文档 -->
+
+    <select id="getContentTypeListByTypeId" resultType="com.transing.dpmbs.web.po.ContentTypePO" parameterType="java.lang.Long">
+        SELECT id,
+                datasource_type_id,
+                content_type,
+                content_type_name,
+                is_default
+
+        FROM content_type
+        WHERE datasource_type_id = #{datasourceTypeId}
+    </select>
+
+    <insert id="addContentType" parameterType="com.transing.dpmbs.integration.bo.ContentTypeBO"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO content_type(datasource_type_id,content_type,content_type_name,is_default)
+        VALUES (#{datasourceTypeId},#{contentType},#{contentTypeName},#{isDefault})
+    </insert>
+
+    <delete id="deleteContentTypeByDatasourceTypeId" parameterType="java.lang.Integer">
+        delete FROM content_type where datasource_type_id = #{dataSourceTypeId}
+    </delete>
+
+    <select id="getContentTypeList" resultType="com.transing.dpmbs.web.po.ContentTypePO" parameterType="java.lang.Long">
+        SELECT id,
+        datasource_type_id,
+        content_type,
+        content_type_name,
+        is_default
+        FROM content_type
+        ORDER BY is_default DESC
+    </select>
+
+</mapper>

@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Fri Feb 20 23:34:39 CST 2015-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="jobTypeMapper">
+    <!-- TODO: 在这里定义各种sql语句，用法请参考iBATIS文档 -->
+
+    <select id="getValidJobTypeByTypeNo" parameterType="java.lang.String" resultType="com.transing.workflow.integration.bo.JobTypeInfo">
+        SELECT
+                type_no,
+                type_name,
+                type_desc,
+                param_config_url,
+                execute_url,
+                progress_url,
+                result_url,
+                type_classify,
+                type_status,
+                job_type,
+                order_number,
+                created_by,
+                created_time,
+                updated_by,
+                updated_time,
+                job_classify
+
+        FROM job_type_info
+        where type_no = #{value} and type_status = 1
+    </select>
+
+    <select id="getJobTypeByProjectId" parameterType="java.lang.String" resultType="com.transing.workflow.integration.bo.JobTypeInfo">
+        SELECT
+                type_no,
+                type_name,
+                type_desc,
+                param_config_url,
+                execute_url,
+                progress_url,
+                result_url,
+                type_classify,
+                job_type,
+                type_status,
+                order_number,
+                created_by,
+                created_time,
+                updated_by,
+                updated_time,
+                job_classify
+
+        FROM job_type_info
+        where type_no = #{value} and type_status = 1
+    </select>
+
+    <select id="getAllValidJobTypeInfo" resultType="com.transing.workflow.integration.bo.JobTypeInfo">
+        SELECT type_no,
+                type_name,
+                type_desc,
+                param_config_url,
+                execute_url,
+                progress_url,
+                result_url,
+                type_classify,
+                job_type,
+                type_status,
+                order_number,
+                created_by,
+                created_time,
+                updated_by,
+                updated_time,
+                job_classify
+
+        FROM job_type_info
+        where  type_status = 1 ORDER BY order_number
+    </select>
+
+    <select id="getOutDataSourceId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT result_type_id
+        FROM project_result_type
+        where  project_id = #{projectId}
+    </select>
+
+    <select id="getOutDataSource" resultType="com.transing.workflow.integration.bo.OutDataSourceBo">
+        SELECT reuslt_type_id,result_type_name,type_no
+        FROM job_type_result
+        where  reuslt_type_id IN
+        <foreach collection="list" item="id"  open="(" close=")" separator="," index="index">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="getOutDataSourceRejectAnlysis" resultType="com.transing.workflow.integration.bo.OutDataSourceBo">
+
+        SELECT reuslt_type_id,result_type_name,type_no
+        FROM job_type_result
+        where  reuslt_type_id IN
+        <foreach collection="list" item="id"  open="(" close=")" separator="," index="index">
+            #{id}
+        </foreach>
+        <![CDATA[
+        AND data_source_type > 0
+        ]]>
+    </select>
+
+    <select id="getJobTypeResultByResultTypeId" resultType="com.transing.workflow.integration.bo.JobTypeResultBO" parameterType="java.lang.Long">
+        SELECT reuslt_type_id,result_type_name,type_no,query_url,data_source_type
+        FROM job_type_result
+        where  reuslt_type_id = #{reusltTypeId}
+    </select>
+
+    <select id="getJobTypeResultListByTypeNo" resultType="com.transing.workflow.integration.bo.JobTypeResultBO" parameterType="java.lang.String">
+        SELECT reuslt_type_id,result_type_name,type_no,query_url,data_source_type
+        FROM job_type_result
+        where  type_no = #{typeNo}
+    </select>
+
+    <select id="getOutDataSourceDetail" parameterType="java.lang.Long" resultType="com.transing.workflow.integration.bo.OutDataSourceDetailBo">
+        SELECT field_id,field_name
+        FROM job_type_result_field
+        where  result_type_id = #{resultTypeId}
+    </select>
+
+    <select id="getResultFieldListByResultTypeId" parameterType="java.lang.Long" resultType="com.transing.workflow.integration.bo.JobTypeResultField">
+        SELECT field_id,
+                result_type_id,
+                field_name,
+                col_name,
+                col_desc,
+                field_type
+
+        FROM job_type_result_field
+        where  result_type_id = #{resultTypeId}
+    </select>
+
+    <select id="getOutDataSourceDemoParamterList" parameterType="java.lang.Long" resultType="com.transing.workflow.integration.bo.OutDataSourceDemoParamter">
+        SELECT field_name,field_desc
+        FROM   job_type_result_query_field
+        where  result_type_id = #{resultTypeId}
+    </select>
+
+    <insert id="addProjectResult" parameterType="com.transing.workflow.integration.bo.ProjectResultTypeBO"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO project_result_type(project_id,flow_id,flow_detail_id,result_type_id)
+        VALUES (#{projectId},#{flowId},#{flowDetailId},#{resultTypeId})
+    </insert>
+
+    <delete id="deleteProjectResultByProjectResult" parameterType="com.transing.workflow.integration.bo.ProjectResultTypeBO">
+        DELETE FROM project_result_type WHERE project_id = #{projectId} and flow_id = #{flowId} and flow_detail_id = #{flowDetailId}
+    </delete>
+
+    <delete id="deleteProjectResultByProjectId" parameterType="java.lang.Long">
+        DELETE FROM project_result_type WHERE project_id = #{projectId}
+    </delete>
+    
+    <select id="getJobTypeResultByParam" parameterType="java.util.Map" resultType="com.transing.workflow.integration.bo.JobTypeResultBO">
+        SELECT reuslt_type_id,
+                type_no,
+                data_source_type,
+                result_type_name,
+                query_url
+        FROM job_type_result
+        WHERE data_source_type = #{dataSourceTypeId}
+               and type_no = #{typeNo}
+    </select>
+
+    <select id="getJobTypeResultListByParam" parameterType="java.util.Map" resultType="com.transing.workflow.integration.bo.JobTypeResultBO">
+        SELECT reuslt_type_id,
+        type_no,
+        data_source_type,
+        result_type_name,
+        query_url
+        FROM job_type_result
+        WHERE data_source_type in
+        <foreach collection="list" item="dataSourceType"  open="(" close=")" separator="," index="index">
+            #{dataSourceType}
+        </foreach>
+        and type_no = #{typeNo}
+    </select>
+
+</mapper>

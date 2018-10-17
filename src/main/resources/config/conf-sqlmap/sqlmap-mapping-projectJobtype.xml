@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="projectJobTypeMapper" >
+
+
+  <select id="getProjectJobTypeListByProjectJobType" resultType="com.transing.dpmbs.integration.bo.ProjectJobTypeBO" parameterType="com.transing.dpmbs.integration.bo.ProjectJobTypeBO" >
+    select id, project_id, pre_type_no, next_type_no, type_no, sort_no, create_time, lastmodify_time
+    from project_job_type
+    where project_id = #{projectId}
+      AND type_no = #{typeNo}
+  </select>
+
+  <select id="getProjectJobTypeListByProjectId" resultType="com.transing.dpmbs.integration.bo.ProjectJobTypeBO" parameterType="java.lang.Long" >
+    select id, project_id, pre_type_no, next_type_no, type_no, sort_no, create_time, lastmodify_time
+    from project_job_type
+    where project_id = #{projectId}
+  </select>
+
+  <select id="getTypeNoByProjectId" resultType="java.lang.String" parameterType="java.lang.Long">
+    select type_no from project_job_type where project_id = #{projectId}
+  </select>
+
+  <delete id="deleteByProjectId" parameterType="java.lang.Long" >
+    delete from project_job_type
+    where project_id = #{projectId}
+  </delete>
+
+  <update id="updateProjectJobType" parameterType="com.transing.dpmbs.integration.bo.ProjectJobTypeBO" >
+    update project_job_type
+    <set >
+      <if test="projectId != null" >
+        project_id = #{projectId,jdbcType=BIGINT},
+      </if>
+      <if test="preTypeNo != null" >
+        pre_type_no = #{preTypeNo,jdbcType=VARCHAR},
+      </if>
+      <if test="nextTypeNo != null" >
+        next_type_no = #{nextTypeNo,jdbcType=VARCHAR},
+      </if>
+      <if test="typeNo != null" >
+        type_no = #{typeNo,jdbcType=VARCHAR},
+      </if>
+      <if test="sortNo != null" >
+        sort_no = #{sortNo,jdbcType=INTEGER},
+      </if>
+      lastmodify_time = now()
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <insert id="addProjectJobType" parameterType="com.transing.dpmbs.integration.bo.ProjectJobTypeBO" useGeneratedKeys="true" keyProperty="id">
+
+    insert into project_job_type
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="projectId != null" >
+        project_id,
+      </if>
+      <if test="preTypeNo != null" >
+        pre_type_no,
+      </if>
+      <if test="nextTypeNo != null" >
+        next_type_no,
+      </if>
+      <if test="typeNo != null" >
+        type_no,
+      </if>
+      <if test="sortNo != null" >
+        sort_no,
+      </if>
+        create_time,
+        lastmodify_time
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="projectId != null" >
+        #{projectId,jdbcType=BIGINT},
+      </if>
+      <if test="preTypeNo != null" >
+        #{preTypeNo,jdbcType=VARCHAR},
+      </if>
+      <if test="nextTypeNo != null" >
+        #{nextTypeNo,jdbcType=VARCHAR},
+      </if>
+      <if test="typeNo != null" >
+        #{typeNo,jdbcType=VARCHAR},
+      </if>
+      <if test="sortNo != null" >
+        #{sortNo,jdbcType=INTEGER},
+      </if>
+      now(),
+      now()
+    </trim>
+  </insert>
+</mapper>

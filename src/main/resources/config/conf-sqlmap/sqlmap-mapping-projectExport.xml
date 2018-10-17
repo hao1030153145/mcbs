@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Fri Feb 20 23:34:39 CST 2015-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="projectExport">
+    <select id="getProjectExportListByProjectExportFilter" resultType="com.transing.dpmbs.web.po.ProjectExportPo"
+            parameterType="com.transing.dpmbs.web.filter.ProjectExportFilter">
+        select id,project_id,json_param,status,progress,error_message,create_time,lastmodify_time from project_export
+        where project_id = #{projectId}
+        <if test="createTimeStart!=null and createTimeStart!=''">
+            <![CDATA[and create_time >=#{createTimeStart}]]>
+        </if>
+        <if test="createTimeEnd!=null and createTimeEnd != ''">
+            <![CDATA[and create_time<=#{createTimeEnd}]]>
+        </if>
+        <if test="status!=null and status!=''">
+            and status=#{status}
+        </if>
+        ORDER BY `create_time` desc
+        <if test="size!=null and size!=''" >
+            limit #{page},#{size}
+        </if>
+    </select>
+
+    <insert id="addProjectExportBO" parameterType="com.transing.dpmbs.integration.bo.ProjectExportBO" keyProperty="id" useGeneratedKeys="true">
+        insert into project_export (project_id,json_param,status,progress,create_time,lastmodify_time) values (#{projectId},<![CDATA[#{jsonParam}]]>,#{status},#{progress},now(),now())
+    </insert>
+
+    <select id="getProjectExportById" parameterType="java.lang.Long" resultType="com.transing.dpmbs.integration.bo.ProjectExportBO">
+        select id,project_id,json_param,status,result_jsonParam,progress,error_message,create_time,lastmodify_time from project_export
+        where id = #{id}
+    </select>
+
+    <update id="updateStatusById" parameterType="java.util.Map">
+        update project_export set status= #{status}
+         <if test="errorMessage != null and errorMessage!=''">
+             ,error_message =#{errorMessage}
+         </if>
+        <if test="resultJsonParam !=null and resultJsonParam!=''">
+            ,result_jsonParam = #{resultJsonParam}
+        </if>
+         where id=#{id}
+    </update>
+
+    <update id="updateProgressById" parameterType="java.util.Map">
+        update project_export set progress=#{progress} where id=#{id}
+    </update>
+    <delete id="deleteExportProjectById" parameterType="java.lang.Integer">
+        delete from project_export where id = #{id};
+    </delete>
+
+    <select id="getProjectExportCount" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+      select count(*) from project_export where project_id = #{id};
+    </select>
+</mapper>

@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="VisualizationMapper" >
+
+  <delete id="deleteVisById" parameterType="java.lang.Integer">
+    DELETE FROM visualization where id = #{visId}
+  </delete>
+
+  <select id="getVisualizationList" parameterType="java.lang.Long" resultType="com.transing.dpmbs.integration.bo.VisualizationBO">
+    SELECT id, name, project_id, create_time, lastmodify_time, image
+    from visualization
+    where project_id = #{projectId}
+  </select>
+
+  <select id="getVisualizationById" parameterType="java.lang.Integer" resultType="com.transing.dpmbs.integration.bo.VisualizationBO">
+    SELECT id, name, project_id, create_time, lastmodify_time, image ,back_setting
+    from visualization
+    where id = #{visId}
+  </select>
+
+  <insert id="addVisualization" parameterType="com.transing.dpmbs.integration.bo.VisualizationBO" useGeneratedKeys="true" keyProperty="id">
+    insert into visualization
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="projectId != null" >
+        project_id,
+      </if>
+      <if test="image != null" >
+        image,
+      </if>
+      create_time,
+      lastmodify_time
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="projectId != null" >
+        #{projectId,jdbcType=INTEGER},
+      </if>
+      <if test="image != null" >
+        #{image,jdbcType=VARCHAR},
+      </if>
+      now(),
+      now()
+    </trim>
+  </insert>
+
+  <update id="updateVisualization" parameterType="com.transing.dpmbs.integration.bo.VisualizationBO" >
+    update visualization
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="projectId != null" >
+        project_id = #{projectId,jdbcType=INTEGER},
+      </if>
+      <if test="image != null" >
+        image = #{image,jdbcType=VARCHAR},
+      </if>
+      <if test="backSetting != null" >
+        back_setting = #{backSetting},
+      </if>
+      lastmodify_time = now()
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <select id="getVisCategoryList" resultType="com.transing.dpmbs.integration.bo.CategoryBO" >
+    select id, img, name, type, create_time, lastmodify_time
+    from category
+  </select>
+
+  <select id="getVisChartList" resultType="com.transing.dpmbs.integration.bo.VisChartBOWithBLOBs" >
+    select id, vis_id, category_id, path, process_class, vis_json_param_id, position, img, type,type_name,
+            name, create_time, lastmodify_time,default_data_array, default_table_array, input_field_array
+    from vis_chart
+  </select>
+
+  <select id="getVisChartById" resultType="com.transing.dpmbs.integration.bo.VisChartBOWithBLOBs" parameterType="java.lang.Integer">
+    select id, vis_id, category_id, path, process_class, vis_json_param_id, position, img, type,type_name,
+            name, create_time, lastmodify_time,default_data_array, default_table_array, input_field_array
+    from vis_chart
+    where id = #{visChartId}
+  </select>
+
+  <select id="getVisSettingJsonParamList" resultType="com.transing.dpmbs.integration.bo.VisJsonParamBO" >
+    select id, type, position, create_time, lastmodify_time,param_settings
+    from vis_json_param
+  </select>
+
+  <select id="getVisSettingJsonParamListByType" resultType="com.transing.dpmbs.integration.bo.VisJsonParamBO" >
+    select id, type, position, create_time, lastmodify_time,param_settings
+    from vis_json_param
+    WHERE TYPE = #{type}
+  </select>
+
+  <select id="getVisTemplateList" resultType="com.transing.dpmbs.integration.bo.VisTemplateBO">
+    select id,url from vis_template
+  </select>
+
+  <select id="getVisModuleList" resultType="com.transing.dpmbs.integration.bo.VisModuleBO" parameterType="java.lang.Integer" >
+    select id, project_id, vis_id, json_param, create_time, lastmodify_time
+    from vis_module
+    where vis_id = #{visId,jdbcType=INTEGER}
+  </select>
+
+  <insert id="addVisModule" parameterType="com.transing.dpmbs.integration.bo.VisModuleBO" >
+    insert into vis_module
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="projectId != null" >
+        project_id,
+      </if>
+      <if test="visId != null" >
+        vis_id,
+      </if>
+      <if test="jsonParam != null" >
+        json_param,
+      </if>
+      create_time,
+      lastmodify_time,
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="projectId != null" >
+        #{projectId,jdbcType=INTEGER},
+      </if>
+      <if test="visId != null" >
+        #{visId,jdbcType=INTEGER},
+      </if>
+      <if test="jsonParam != null" >
+        #{jsonParam,jdbcType=LONGVARCHAR},
+      </if>
+      now(),
+      now()
+    </trim>
+  </insert>
+
+  <delete id="deleteVisModuleByVisId" parameterType="java.lang.Integer" >
+    delete from vis_module
+    where vis_id = #{visId,jdbcType=INTEGER}
+  </delete>
+
+</mapper>

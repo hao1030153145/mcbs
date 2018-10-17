@@ -1,0 +1,1144 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Fri Feb 20 23:34:39 CST 2015-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="workFlowMapper">
+    <!-- TODO: 在这里定义各种sql语句，用法请参考iBATIS文档 -->
+
+    <select id="getAllNeedProcessWorkFlowInfo" resultType="com.transing.workflow.integration.bo.WorkFlowInfo">
+        SELECT flow_id, type_no, project_id, total_job_num, complate_job_num, status, created_by, created_time, updated_by, updated_time
+        FROM  work_flow_info
+        where status = 1 ORDER BY project_id
+    </select>
+
+
+    <select id="getRunningWorkFlowInfo" resultType="com.transing.workflow.integration.bo.WorkFlowInfo">
+        SELECT flow_id, type_no, project_id, total_job_num, complate_job_num, status, created_by, created_time, updated_by, updated_time
+        FROM  work_flow_info
+        where status = 3 ORDER BY project_id
+    </select>
+
+    <select id="getWorkFlowInfoByWorkFlowId" parameterType="java.lang.Long"
+            resultType="com.transing.workflow.integration.bo.WorkFlowInfo">
+        SELECT flow_id, type_no, project_id, total_job_num, complate_job_num, status, created_by, created_time, updated_by, updated_time
+        FROM  work_flow_info
+        where flow_id = ${value}
+    </select>
+
+    <select id="getWorkFlowInfoByParam" parameterType="java.util.Map"
+            resultType="com.transing.workflow.integration.bo.WorkFlowInfo">
+        SELECT flow_id,type_no, project_id,total_job_num, complate_job_num, status, created_by, created_time, updated_by, updated_time
+        FROM  work_flow_info
+        where project_id = ${projectId} and type_no = #{typeNo}
+    </select>
+
+    <select id="getWorkFlowInfoByProjectId" parameterType="java.lang.Long"
+            resultType="com.transing.workflow.integration.bo.WorkFlowInfo">
+        SELECT flow_id,type_no, project_id, total_job_num, complate_job_num, status, created_by, created_time, updated_by, updated_time
+        FROM  work_flow_info
+        where project_id = #{projectId}
+        ORDER BY project_id
+    </select>
+
+    <select id="getWorkFlowInfoByProjectIdANdTypeNo" parameterType="java.util.Map"
+            resultType="com.transing.workflow.integration.bo.WorkFlowInfo">
+        SELECT flow_id,type_no, project_id, total_job_num, complate_job_num, status, created_by, created_time, updated_by, updated_time
+        FROM  work_flow_info
+        where project_id = #{projectId}
+        and type_no = #{typeNo}
+        ORDER BY project_id
+    </select>
+
+    <select id="getStatusByDetailId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        SELECT job_status
+        FROM work_flow_detail
+        WHERE flow_detail_id = #{detailId}
+    </select>
+
+    <!--这个是根据detailId获得节点类型-->
+    <select id="getTypeNoByDetailId" parameterType="java.lang.Integer" resultType="java.lang.String">
+        SELECT type_no
+        FROM work_flow_detail
+        where flow_detail_id = #{flowDetailId}
+    </select>
+
+    <select id="getFirstDetailByProjectId" parameterType="java.lang.Long"
+            resultType="com.transing.workflow.integration.bo.WorkFlowDetail">
+        SELECT flow_detail_id, flow_id, project_id, quartz_time, type_no,data_source_type,prev_flow_detail_ids,next_flow_detail_ids,result_param, job_begin_time, job_end_time, job_progress, job_status,error_msg, created_by, created_time, updated_by, updated_time,work_flow_id
+        FROM   work_flow_detail
+        where  prev_flow_detail_ids = '0'
+          and project_id = #{projectId}
+    </select>
+
+    <select id="getExecDetailListByTypeNo" parameterType="java.util.Map"
+            resultType="com.transing.workflow.integration.bo.WorkFlowDetail">
+        SELECT flow_detail_id, flow_id, project_id, quartz_time, type_no, data_source_type,prev_flow_detail_ids,next_flow_detail_ids,result_param, job_begin_time, job_end_time, job_progress, job_status,error_msg, created_by, created_time, updated_by, updated_time
+        FROM   work_flow_detail
+        where  (job_status = 1 or job_status = 3)
+        and type_no = #{typeNo}
+        and project_id = #{projectId}
+    </select>
+
+    <select id="getWorkFlowDetailByWorkFlowDetailId" resultType="com.transing.workflow.integration.bo.WorkFlowDetail">
+        SELECT flow_detail_id,work_flow_id, work_flow_template_id,flow_id, project_id, quartz_time, type_no, data_source_type,prev_flow_detail_ids,next_flow_detail_ids,result_param, job_begin_time, job_end_time, job_progress, job_status,error_msg, created_by, created_time, updated_by, updated_time
+        FROM   work_flow_detail
+        where  flow_detail_id =  ${value}
+    </select>
+
+    <select id="getWorkFlowDetailListByWorkFlowId" resultType="com.transing.workflow.integration.bo.WorkFlowDetail">
+        SELECT flow_detail_id, flow_id, project_id, quartz_time, type_no,data_source_type,prev_flow_detail_ids,next_flow_detail_ids,result_param, job_begin_time, job_end_time, quartz_time, job_progress,error_msg, job_status, created_by, created_time, updated_by, updated_time
+        FROM work_flow_detail
+        where  flow_id =  ${value}
+    </select>
+
+    <select id="getWorkFlowDetailListByTypeNoList" parameterType="java.util.Map"
+            resultType="com.transing.workflow.integration.bo.WorkFlowDetail">
+        SELECT flow_detail_id, flow_id, project_id, quartz_time,
+        type_no,data_source_type,prev_flow_detail_ids,next_flow_detail_ids,result_param, job_begin_time, job_end_time,
+        job_progress, job_status, error_msg, created_by, created_time, updated_by, updated_time
+        FROM work_flow_detail
+        <where>
+            <if test="null != list and list.size > 0">
+                type_no in
+                <foreach collection="list" item="typeNo" index="index"
+                         open="(" close=")" separator=",">
+                    #{typeNo}
+                </foreach>
+            </if>
+            and project_id = #{projectId}
+        </where>
+    </select>
+
+    <select id="getWorkFlowDetailListByTypeNoListAndWorkFlowId" parameterType="java.util.Map"
+            resultType="com.transing.workflow.integration.bo.WorkFlowDetail">
+        SELECT flow_detail_id, flow_id, project_id, quartz_time,
+        type_no,data_source_type,prev_flow_detail_ids,next_flow_detail_ids,result_param, job_begin_time, job_end_time,
+        job_progress, job_status, error_msg, created_by, created_time, updated_by, updated_time
+        FROM work_flow_detail
+        <where>
+            <if test="null != list and list.size > 0">
+                type_no in
+                <foreach collection="list" item="typeNo" index="index"
+                         open="(" close=")" separator=",">
+                    #{typeNo}
+                </foreach>
+            </if>
+            and work_flow_id = #{workFlowId}
+        </where>
+    </select>
+
+    <select id="getWorkFlowParamByProJectId" parameterType="java.lang.Long"
+            resultType="com.transing.workflow.integration.bo.WorkFlowParam">
+        select param_id,flow_detail_id,flow_id,project_id,type_no,json_param,param_type,created_by,created_date,updated_by,updated_date
+        from work_flow_param where project_id = #{projectId}
+    </select>
+
+    <update id="updateWorkFlowDetailByMap" parameterType="java.util.Map">
+        update work_flow_detail
+        set  job_status = #{jobStatus},error_msg=#{errorMsg}
+        where  flow_detail_id =  #{workFlowDetailId}
+
+    </update>
+
+    <update id="updateWorkFlowDetailExceptionByMap" parameterType="java.util.Map">
+        update work_flow_detail
+        set  job_status = 9,error_msg=#{errorMsg}
+        where  flow_detail_id =  #{workFlowDetailId}
+
+    </update>
+
+    <update id="updateWorkFlowDetailQuartzTime" parameterType="com.transing.workflow.integration.bo.WorkFlowDetail">
+        UPDATE work_flow_detail
+        set quartz_time = #{quartzTime}
+        WHERE flow_detail_id =  #{flowDetailId}
+    </update>
+
+    <insert id="addWorkFlowDetail" parameterType="com.transing.workflow.integration.bo.WorkFlowDetail"
+            useGeneratedKeys="true" keyProperty="flowDetailId">
+        insert into work_flow_detail
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+
+            <if test="workFlowTemplateId != null">
+                work_flow_template_id,
+            </if>
+            <if test="flowId != null">
+                flow_id,
+            </if>
+            <if test="projectId != null">
+                project_id,
+            </if>
+            <if test="workFlowId != null">
+                work_flow_id,
+            </if>
+            <if test="typeNo != null">
+                type_no,
+            </if>
+            <if test="quartzTime != null">
+                quartz_time,
+            </if>
+            <if test="dataSourceType != null">
+                data_source_type,
+            </if>
+            <if test="jobProgress != null">
+                job_progress,
+            </if>
+            <if test="jobStatus != null">
+                job_status,
+            </if>
+            <if test="errorMsg != null">
+                error_msg,
+            </if>
+            <if test="createdBy != null">
+                created_by,
+            </if>
+            <if test="updatedBy != null">
+                updated_by,
+            </if>
+
+            <if test="prevFlowDetailIds != null">
+                prev_flow_detail_ids,
+            </if>
+            <if test="nextFlowDetailIds != null">
+                next_flow_detail_ids,
+            </if>
+            <if test="resultParam != null">
+                result_param,
+            </if>
+            <if test="nodeInfo != null">
+                node_info,
+            </if>
+            <if test="isSave != null">
+                is_save,
+            </if>
+
+            job_begin_time,
+            job_end_time,
+            created_time,
+            updated_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="workFlowTemplateId != null">
+                #{workFlowTemplateId},
+            </if>
+            <if test="flowId != null">
+                #{flowId,jdbcType=INTEGER},
+            </if>
+            <if test="projectId != null">
+                #{projectId,jdbcType=INTEGER},
+            </if>
+            <if test="workFlowId != null">
+                #{workFlowId},
+            </if>
+            <if test="typeNo != null">
+                #{typeNo,jdbcType=VARCHAR},
+            </if>
+            <if test="quartzTime != null">
+                #{quartzTime,jdbcType=VARCHAR},
+            </if>
+            <if test="dataSourceType != null">
+                #{dataSourceType,jdbcType=VARCHAR},
+            </if>
+            <if test="jobProgress != null">
+                #{jobProgress,jdbcType=INTEGER},
+            </if>
+            <if test="jobStatus != null">
+                #{jobStatus,jdbcType=INTEGER},
+            </if>
+            <if test="errorMsg != null">
+                #{errorMsg,jdbcType=VARCHAR},
+            </if>
+            <if test="createdBy != null">
+                #{createdBy,jdbcType=VARCHAR},
+            </if>
+
+            <if test="updatedBy != null">
+                #{updatedBy,jdbcType=VARCHAR},
+            </if>
+
+            <if test="prevFlowDetailIds != null">
+                #{prevFlowDetailIds,jdbcType=VARCHAR},
+            </if>
+            <if test="nextFlowDetailIds != null">
+                #{nextFlowDetailIds,jdbcType=VARCHAR},
+            </if>
+            <if test="resultParam != null">
+                #{resultParam,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="nodeInfo != null">
+                #{nodeInfo},
+            </if>
+            <if test="isSave != null">
+                #{isSave},
+            </if>
+            now(),
+            now(),
+            now(),
+            now()
+        </trim>
+    </insert>
+
+    <update id="updateWorkFlowDetail" parameterType="com.transing.workflow.integration.bo.WorkFlowDetail">
+        update work_flow_detail
+        <set>
+            <if test="flowId != null">
+                flow_id = #{flowId,jdbcType=BIGINT},
+            </if>
+            <if test="projectId != null">
+                project_id = #{projectId,jdbcType=BIGINT},
+            </if>
+            <if test="prevFlowDetailIds != null">
+                prev_flow_detail_ids = #{prevFlowDetailIds,jdbcType=VARCHAR},
+            </if>
+            <if test="nextFlowDetailIds != null">
+                next_flow_detail_ids = #{nextFlowDetailIds,jdbcType=VARCHAR},
+            </if>
+            <if test="typeNo != null">
+                type_no = #{typeNo,jdbcType=VARCHAR},
+            </if>
+            <if test="quartzTime != null">
+                quartz_time = #{quartzTime,jdbcType=VARCHAR},
+            </if>
+            <if test="dataSourceType != null">
+                data_source_type = #{dataSourceType,jdbcType=VARCHAR},
+            </if>
+            <if test="jobBeginTime != null">
+                job_begin_time = #{jobBeginTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="jobEndTime != null">
+                job_end_time = #{jobEndTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="jobProgress != null">
+                job_progress = #{jobProgress,jdbcType=INTEGER},
+            </if>
+            <if test="jobStatus != null">
+                job_status = #{jobStatus,jdbcType=INTEGER},
+            </if>
+            <if test="errorMsg != null">
+                error_msg = #{errorMsg,jdbcType=VARCHAR},
+            </if>
+            <if test="createdBy != null">
+                created_by = #{createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="createdTime != null">
+                created_time = #{createdTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null">
+                updated_by = #{updatedBy,jdbcType=VARCHAR},
+            </if>
+            <if test="resultParam != null">
+                result_param = #{resultParam,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="nodeInfo != null">
+                node_info = #{nodeInfo},
+            </if>
+            <if test="isSave != null">
+                is_save = #{isSave},
+            </if>
+            updated_time = now()
+        </set>
+        where flow_detail_id = #{flowDetailId,jdbcType=BIGINT}
+    </update>
+
+    <insert id="addWorkFlowInfo" parameterType="com.transing.workflow.integration.bo.WorkFlowInfo"
+            useGeneratedKeys="true" keyProperty="flowId">
+        insert into work_flow_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="flowId != null">
+                flow_id,
+            </if>
+            <if test="typeNo != null">
+                type_no,
+            </if>
+            <if test="projectId != null">
+                project_id,
+            </if>
+            <if test="totalJobNum != null">
+                total_job_num,
+            </if>
+            <if test="complateJobNum != null">
+                complate_job_num,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="createdBy != null">
+                created_by,
+            </if>
+            <if test="updatedBy != null">
+                updated_by,
+            </if>
+            created_time,
+            updated_time
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="flowId != null">
+                #{flowId,jdbcType=BIGINT},
+            </if>
+            <if test="typeNo != null">
+                #{typeNo},
+            </if>
+            <if test="projectId != null">
+                #{projectId,jdbcType=INTEGER},
+            </if>
+            <if test="totalJobNum != null">
+                #{totalJobNum,jdbcType=INTEGER},
+            </if>
+            <if test="complateJobNum != null">
+                #{complateJobNum,jdbcType=INTEGER},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=INTEGER},
+            </if>
+            <if test="createdBy != null">
+                #{createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updatedBy != null">
+                #{updatedBy,jdbcType=VARCHAR},
+            </if>
+            now(),
+            now()
+        </trim>
+    </insert>
+
+    <update id="updateWorkFlowInfo" parameterType="com.transing.workflow.integration.bo.WorkFlowInfo">
+        update work_flow_info
+        <set>
+            <if test="totalJobNum != null">
+                total_job_num = #{totalJobNum},
+            </if>
+            <if test="complateJobNum != null">
+                complate_job_num = #{complateJobNum},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            updated_time = now()
+        </set>
+        where flow_id = #{flowId}
+    </update>
+
+    <update id="updateWorkFlowParam" parameterType="com.transing.workflow.integration.bo.WorkFlowParam">
+        update work_flow_param
+        <set>
+            <if test="jsonParam != null">
+                json_param = #{jsonParam},
+            </if>
+            updated_date = now()
+        </set>
+        where param_id = #{paramId}
+    </update>
+
+    <update id="updateWorkFlowDetailToStart" parameterType="java.lang.Long">
+        update work_flow_detail
+        set
+            job_status = 1,
+            updated_time = now()
+        where flow_detail_id = #{flowDetailId}
+              and job_status = 0
+    </update>
+
+    <update id="updateWorkFlowDetailToFinish" parameterType="java.lang.Long">
+        update work_flow_detail
+        set
+        job_status = 2,
+        updated_time = now()
+        where flow_detail_id = #{flowDetailId} and job_status != 4 and job_status != 9
+    </update>
+
+    <update id="updateWorkFlowDetailProgress" parameterType="java.util.Map">
+        update work_flow_detail
+        set
+        job_progress = #{jobProgress},
+        updated_time = now()
+        where flow_detail_id = #{flowDetailId}
+    </update>
+
+    <update id="updateWorkFlowInfoComNum" parameterType="java.lang.Long">
+        update work_flow_info
+        set
+        complate_job_num = complate_job_num + 1,
+        updated_time = now()
+        where flow_id = #{flowId}
+    </update>
+
+    <update id="updateWorkFlowInfoToFinishIfComNum" parameterType="java.lang.Long">
+        <![CDATA[
+
+            update work_flow_info
+                set
+                status = 2,
+                updated_time = now()
+                where flow_id = #{flowId}
+                and complate_job_num >= total_job_num
+
+        ]]>
+    </update>
+
+    <update id="updateWorkFlowInfoToInitByFlowId" parameterType="java.lang.Long">
+        update work_flow_info
+        set
+        status = 1,
+        updated_time = now()
+        where flow_id = #{flowId}
+        and status = 3
+    </update>
+
+    <update id="updateWorkFlowInfoToStart" parameterType="java.lang.Long">
+        update work_flow_info
+        set
+        status = 3,
+        updated_time = now()
+        where flow_id = #{flowId}
+    </update>
+
+    <update id="updateWorkFlowInfoStatusExceptionByFlowId" parameterType="java.lang.Long">
+        update work_flow_info
+        set
+        status = 9,
+        updated_time = now()
+
+        where flow_id = #{flowId}
+    </update>
+
+    <update id="updateWorkFlowInfoToStopByFlowId" parameterType="java.lang.Long">
+        update work_flow_info
+        set
+        status = 4,
+        updated_time = now()
+
+        where flow_id = #{flowId}
+    </update>
+
+    <update id="updateWorkFlowInfoToRunningByProjectId" parameterType="java.lang.Long">
+        update work_flow_info
+        set
+        status = 3,
+        updated_time = now()
+        where project_id = #{projectId}
+               and (status = 0 or status = 4 or status = 9)
+    </update>
+
+    <update id="updateWorkFlowInfoToRunningIfFinishByProjectId" parameterType="java.lang.Long">
+        update work_flow_info
+        set
+        status = 1,
+        complate_job_num = 0,
+        updated_time = now()
+        where project_id = #{projectId}
+        and status = 2
+    </update>
+
+    <update id="updateWorkFlowDetailToRunningIfFinishByProjectId" parameterType="java.lang.Long">
+        update work_flow_detail
+        set
+        job_status = 1,
+        job_progress = 0,
+        updated_time = now()
+        where project_id = #{projectId}
+        and job_status = 2
+    </update>
+
+    <update id="updateWorkFlowInfoToStopByProjectId" parameterType="java.lang.Long">
+        update work_flow_info
+        set
+        status = 4,
+        updated_time = now()
+        where project_id = #{projectId}
+              and (status = 1 or status = 3)
+    </update>
+
+    <update id="updateWorkFlowDetailToStartByProjectId" parameterType="java.util.Map">
+        update work_flow_detail
+        set
+        job_status = 1,
+        updated_time = now()
+        where project_id = #{projectId}
+        and (job_status = 4 or job_status=9 or job_status = 0)
+        <if test="null != list and list.size() > 0">
+            and flow_detail_id in
+            <foreach collection="list" item="id" index="index"
+                     open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+    </update>
+
+    <update id="updateWorkFlowDetailToStartByWorkFlowId" parameterType="java.util.Map">
+        update work_flow_detail
+        set
+        job_status = 1,
+        updated_time = now()
+        where work_flow_id = #{workFlowId}
+        and (job_status = 4 or job_status=9 or job_status = 0 or job_status=2 or job_status=6)
+        <if test="null != list and list.size() > 0">
+            and flow_detail_id in
+            <foreach collection="list" item="id" index="index"
+                     open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+    </update>
+
+    <update id="updateWorkFlowDetailToStopByProjectId" parameterType="java.lang.Long">
+        update work_flow_detail
+        set
+        job_status = 4,
+        updated_time = now()
+        where project_id = #{projectId}
+        and job_status = 0
+    </update>
+
+    <delete id="deleteWorkFlowParamByParamId" parameterType="java.lang.Long">
+        DELETE FROM work_flow_param WHERE  param_id = #{paramId}
+    </delete>
+
+    <delete id="deleteWorkFlowDetailByDetailId" parameterType="java.lang.Long">
+        DELETE FROM work_flow_detail WHERE  flow_detail_id = #{flowDetailId}
+    </delete>
+
+    <insert id="addWorkFlowParam" parameterType="com.transing.workflow.integration.bo.WorkFlowParam"
+            useGeneratedKeys="true" keyProperty="paramId">
+        insert into work_flow_param
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="paramId != null">
+                param_id,
+            </if>
+            <if test="flowDetailId != null">
+                flow_detail_id,
+            </if>
+            <if test="flowId != null">
+                flow_id,
+            </if>
+            <if test="projectId != null">
+                project_id,
+            </if>
+            <if test="typeNo != null">
+                type_no,
+            </if>
+            <if test="paramType != null">
+                param_type,
+            </if>
+            <if test="createdBy != null">
+                created_by,
+            </if>
+            <if test="updatedBy != null">
+                updated_by,
+            </if>
+            <if test="jsonParam != null">
+                json_param,
+            </if>
+            created_date,
+            updated_date
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="paramId != null">
+                #{paramId,jdbcType=BIGINT},
+            </if>
+            <if test="flowDetailId != null">
+                #{flowDetailId,jdbcType=BIGINT},
+            </if>
+            <if test="flowId != null">
+                #{flowId,jdbcType=BIGINT},
+            </if>
+            <if test="projectId != null">
+                #{projectId,jdbcType=BIGINT},
+            </if>
+            <if test="typeNo != null">
+                #{typeNo,jdbcType=VARCHAR},
+            </if>
+            <if test="paramType != null">
+                #{paramType,jdbcType=INTEGER},
+            </if>
+            <if test="createdBy != null">
+                #{createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updatedBy != null">
+                #{updatedBy,jdbcType=VARCHAR},
+            </if>
+            <if test="jsonParam != null">
+                #{jsonParam,jdbcType=LONGVARCHAR},
+            </if>
+            now(),
+            now()
+        </trim>
+    </insert>
+
+    <select id="getWorkFlowParamListByParam" resultType="com.transing.workflow.integration.bo.WorkFlowParam"
+            parameterType="java.util.Map">
+        select
+            param_id, flow_detail_id, flow_id, project_id, type_no, param_type, json_param,created_date,updated_date
+        from work_flow_param
+        where type_no = #{typeNo}
+               and project_id = #{projectId}
+    </select>
+
+    <select id="getWorkFlowParamByDetailId" resultType="com.transing.workflow.integration.bo.WorkFlowParam"
+            parameterType="java.lang.Long">
+        select
+        param_id, flow_detail_id, flow_id, project_id, type_no, param_type, json_param,created_date
+        from work_flow_param
+        where flow_detail_id = #{flowDetailId}
+    </select>
+
+    <select id="getWorkFlowParamByFlowParam" resultType="com.transing.workflow.integration.bo.WorkFlowParam"
+            parameterType="com.transing.workflow.integration.bo.WorkFlowParam">
+        select
+        param_id, flow_detail_id, flow_id, project_id, type_no, param_type, json_param
+        from work_flow_param
+        where project_id = #{projectId}
+
+        <if test="paramType != null ">
+            and param_type= #{paramType}
+        </if>
+        <if test="flowDetailId !=null">
+            and flow_detail_id=#{flowDetailId}
+        </if>
+        <if test="flowId != null">
+            and flow_id =#{flowId}
+        </if>
+    </select>
+
+    <select id="getWorkFlowParamListByTypeNoList" resultType="com.transing.workflow.integration.bo.WorkFlowParam"
+            parameterType="java.util.Map">
+        select
+        param_id, flow_detail_id, flow_id, project_id, type_no, param_type, json_param
+        from work_flow_param
+        where type_no in
+        <foreach collection="list" item="typeNo" index="index"
+                 open="(" close=")" separator=",">
+            #{typeNo}
+        </foreach>
+        and project_id = #{projectId}
+    </select>
+
+    <select id="getWorkFlowParamByParamId" resultType="com.transing.workflow.integration.bo.WorkFlowParam"
+            parameterType="java.lang.Long">
+        select
+            param_id, flow_detail_id, flow_id, project_id, type_no, param_type, json_param
+        from work_flow_param
+        where param_id = #{paramId}
+    </select>
+    <select id="getWorkFlowDetailByProjectId" resultType="com.transing.workflow.integration.bo.WorkFlowDetail"
+            parameterType="java.lang.Long">
+        select
+            flow_detail_id,work_flow_template_id,flow_id,project_id,prev_flow_detail_ids,next_flow_detail_ids,type_no,quartz_time,data_source_type,
+            job_begin_time,job_end_time,job_progress,job_status,error_msg,created_by,created_time,updated_by,updated_time,result_param,node_info,is_save
+        from work_flow_detail
+        where project_id = #{projectId}
+    </select>
+
+    <select id="getWorkFlowDetailByStatus" resultType="com.transing.workflow.integration.bo.WorkFlowDetail"
+            parameterType="java.lang.Integer">
+        select
+            flow_detail_id,work_flow_template_id,work_flow_id,flow_id,project_id,prev_flow_detail_ids,next_flow_detail_ids,type_no,quartz_time,data_source_type,
+            job_begin_time,job_end_time,job_progress,job_status,error_msg,created_by,created_time,updated_by,updated_time,result_param,node_info,is_save
+        from work_flow_detail
+        where job_status = #{jobStatus}
+    </select>
+
+    <select id="getWorkFlowNodeByTemplateId" parameterType="java.lang.Integer"
+            resultType="com.transing.workflow.integration.bo.WorkFlowNodeBO">
+        select flow_id,template_id,pre_flow_id_ids,next_flow_id_ids,type_no,name,node_info,node_param,is_save,job_status from work_flow_node where template_id = #{templateId};
+    </select>
+
+    <select id="getWorkFlowNodeByFlowId" parameterType="java.lang.Long"
+            resultType="com.transing.workflow.integration.bo.WorkFlowNodeBO">
+         select flow_id,template_id,pre_flow_id_ids,next_flow_id_ids,type_no,node_param,job_status from work_flow_node where flow_id = #{flow};
+    </select>
+
+    <select id="getWorkFlowParamByFlowId" parameterType="java.util.Map"
+            resultType="com.transing.workflow.integration.bo.WorkFlowParam">
+        select
+        param_id, flow_detail_id, flow_id, project_id, type_no, param_type, json_param,created_date,updated_date
+        from work_flow_param where flow_id = #{flowId}
+        <if test="projectId!=null and projectId!=''">
+            and project_id = #{projectId}
+        </if>
+    </select>
+
+    <select id="getWorkFlowTemplateNodeParamBoListByMap"
+            resultType="com.transing.workflow.integration.bo.WorkFlowTemplateNodeParamBo" parameterType="java.util.Map">
+        select
+        param_id,template_id,work_flow_node_id as work_flow_template_node_id,type_no,created_by,created_date,updated_by,
+        updated_date,input_param_id,input_param_cn_name,input_param_type,input_param_value,config
+        from work_flow_template_node_param
+        where template_id = #{workFlowTemplateId}
+        <if test="workFlowNodeId != null and workFlowNodeId!=''">
+            and work_flow_node_id = #{workFlowNodeId}
+        </if>
+    </select>
+
+    <insert id="addWorkFlowNodeParam" parameterType="com.transing.workflow.integration.bo.WorkFlowNodeParamBo"
+            useGeneratedKeys="true" keyProperty="paramId">
+        insert into work_flow_node_param
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="paramId != null">
+                param_id,
+            </if>
+            <if test="flowDetailId != null">
+                flow_detail_id,
+            </if>
+            <if test="projectId != null">
+                project_id,
+            </if>
+            <if test="workFlowId != null">
+                work_flow_id,
+            </if>
+            <if test="typeNo != null">
+                type_no,
+            </if>
+            <if test="paramType != null">
+                param_type,
+            </if>
+            <if test="createdBy != null">
+                created_by,
+            </if>
+            <if test="updatedBy != null">
+                updated_by,
+            </if>
+            <if test="inputParamId!= null">
+                input_param_id,
+            </if>
+            <if test="inputParamCnName !=null">
+                input_param_cn_name,
+            </if>
+            <if test="inputParamType !=null">
+                input_param_type,
+            </if>
+            <if test="inputParamValue !=null">
+                input_param_value,
+            </if>
+            <if test="config !=null">
+                config,
+            </if>
+            created_date,
+            updated_date
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="paramId != null">
+                #{paramId,jdbcType=BIGINT},
+            </if>
+            <if test="flowDetailId != null">
+                #{flowDetailId,jdbcType=BIGINT},
+            </if>
+            <if test="projectId != null">
+                #{projectId,jdbcType=BIGINT},
+            </if>
+            <if test="workFlowId != null">
+                #{workFlowId},
+            </if>
+            <if test="typeNo != null">
+                #{typeNo,jdbcType=VARCHAR},
+            </if>
+            <if test="paramType != null">
+                #{paramType,jdbcType=INTEGER},
+            </if>
+            <if test="createdBy != null">
+                #{createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updatedBy != null">
+                #{updatedBy,jdbcType=VARCHAR},
+            </if>
+            <if test="inputParamId!= null">
+                #{inputParamId,jdbcType=INTEGER},
+            </if>
+            <if test="inputParamCnName !=null">
+                #{inputParamCnName,jdbcType=VARCHAR},
+            </if>
+            <if test="inputParamType !=null">
+                #{inputParamType,jdbcType=VARCHAR},
+            </if>
+            <if test="inputParamValue !=null">
+                #{inputParamValue,jdbcType=VARCHAR},
+            </if>
+            <if test="config !=null">
+                #{config},
+            </if>
+            now(),
+            now()
+        </trim>
+    </insert>
+
+    <select id="getJobTypeCategoryBOList" resultType="com.transing.workflow.integration.bo.JobTypeCategoryBO">
+        select id,name from job_type_category
+    </select>
+
+    <select id="getJobTypeInfo" resultType="com.transing.workflow.integration.bo.JobTypeInfo">
+        select type_no,type_name,type_desc,param_config_url,execute_url,progress_url,result_url,type_classify,job_type,type_status,
+        order_number,created_by,created_time,updated_by,updated_time,job_classify,input_num,job_type_category_id,query_url,img_url,tip
+        FROM job_type_info
+    </select>
+
+    <select id="getWorkFlowInputParamBoList" resultType="com.transing.workflow.integration.bo.WorkFlowInputParamBo">
+        select id,type_no,param_cn_name,param_en_name,prompt,style_id,restrictions,is_required,control_prop,create_time,lastmodify_time,request_url,
+        filed_mapping,param_type,is_show,next_param_id,pre_param_id,order_num
+        from work_flow_input_param
+        order by order_num
+    </select>
+
+    <select id="getStyleBOList" resultType="com.transing.workflow.integration.bo.StyleBO">
+        select id,style_code,style_name,style_path,create_time,lastmodify_time FROM style
+    </select>
+    <select id="getTemplateNodeParamByTemplateFlowId" parameterType="java.lang.Long"
+            resultType="com.transing.workflow.integration.bo.WorkFlowTemplateNodeParamBo">
+        select param_id,template_id,work_flow_node_id,type_no,created_by,created_date,updated_by,updated_date,input_param_id,input_param_cn_name,
+        input_param_type,input_param_value,config
+        FROM work_flow_template_node_param
+        where work_flow_node_id=#{templateFlowId}
+    </select>
+
+    <select id="getWorkFlowNodeParamByFlowDetailId" parameterType="java.lang.Long"
+            resultType="com.transing.workflow.integration.bo.WorkFlowNodeParamBo">
+        select param_id,flow_detail_id,project_id,work_flow_id,type_no,param_type,created_by,created_date,updated_by,updated_date,input_param_id,input_param_cn_name,
+        input_param_type,input_param_value,config
+        FROM  work_flow_node_param
+        where flow_detail_id = #{workFlowDetailId}
+    </select>
+
+    <select id="getWorkFlowNodeParamByProjectId" parameterType="java.lang.Long"
+            resultType="com.transing.workflow.integration.bo.WorkFlowNodeParamBo">
+        select param_id,flow_detail_id,project_id,type_no,param_type,created_by,created_date,updated_by,updated_date,input_param_id,input_param_cn_name,
+        input_param_type,input_param_value,config
+        FROM  work_flow_node_param
+        where project_id = #{projectId}
+    </select>
+
+    <update id="updateWorkFlowNodeParam" parameterType="com.transing.workflow.integration.bo.WorkFlowNodeParamBo">
+        update work_flow_node_param
+        <set>
+            <if test="flowDetailId != null">
+                flow_detail_id = #{flowDetailId},
+            </if>
+            <if test="projectId != null">
+                project_id = #{projectId},
+            </if>
+            <if test="typeNo != null">
+                type_no = #{typeNo},
+            </if>
+            <if test="paramType != null">
+                param_type = #{paramType},
+            </if>
+            <if test="typeNo != null">
+                type_no = #{typeNo},
+            </if>
+            <if test="createdBy != null">
+                created_by = #{createdBy},
+            </if>
+            <if test="createdDate != null">
+                created_date = #{createdDate},
+            </if>
+            <if test="updatedBy != null">
+                updated_by = #{updatedBy},
+            </if>
+            <if test="inputParamId != null">
+                input_param_id = #{inputParamId},
+            </if>
+            <if test="inputParamCnName != null">
+                input_param_cn_name = #{inputParamCnName},
+            </if>
+            <if test="inputParamType != null">
+                input_param_type = #{inputParamType},
+            </if>
+            <if test="inputParamValue != null">
+                input_param_value = #{inputParamValue},
+            </if>
+            <if test="config != null">
+                config = #{config},
+            </if>
+            updated_date = now()
+        </set>
+        where param_id = #{paramId}
+    </update>
+    <select id="getWrokFlowNodeParamListByMap" parameterType="java.util.Map"
+            resultType="com.transing.workflow.integration.bo.WorkFlowNodeParamBo">
+       select param_id,flow_detail_id,project_id,type_no,param_type,created_by,created_date,updated_by,updated_date,input_param_id,input_param_cn_name,
+        input_param_type,input_param_value,config
+        FROM  work_flow_node_param
+        where project_id = #{projectId} and type_no = #{typeNo}
+    </select>
+    <delete id="deleteWorkFlowNodeParamByFlowDetailId" parameterType="java.lang.Long">
+        delete FROM work_flow_node_param where flow_detail_id = #{flowDetailId}
+    </delete>
+    <delete id="deleteWorkFlowOutputFiledByFlowDetailId" parameterType="java.lang.Long">
+        delete FROM work_flow_output_filed where flow_detail_id = #{flowDetailId}
+    </delete>
+
+    <delete id="deleteWorkFlowOutputFiledByFlowDetailIdList" parameterType="java.util.List">
+        delete FROM work_flow_output_filed where flow_detail_id IN 
+        <foreach collection="list" item="workFlowDetail" index="index" open="(" close=")" separator=",">
+            #{workFlowDetail.flowDetailId}
+        </foreach>
+    </delete>
+    
+    <select id="getWorkFlowInputParamRelationBO"
+            resultType="com.transing.workflow.integration.bo.WorkFlowInputParamRelationBO">
+        select id,type_no,input_param_id,relation_type,create_time,lastmodify_time from work_flow_input_param_relation
+    </select>
+
+    <select id="getWorkFlowListPOByFilter"
+            resultType="com.transing.dpmbs.integration.bo.WorkFlowListBO" parameterType="com.transing.dpmbs.web.filter.WorkFlowListFilter">
+        select work_flow_id,project_id,work_flow_template_id,work_flow_name,create_time,finish_time,status,img,progress from work_flow_list where project_id = #{projectId}
+        <if test="workFlowName != null and workFlowName != ''">
+            and work_flow_name like '%${workFlowName}%'
+        </if>
+        <if test="status != null and status != ''">
+            and status=#{status}
+        </if>
+        <if test="sort !=null and sort != ''">
+            order BY ${sort}
+        </if>
+        <if test="page != null and size != null">
+            limit #{page},#{size}
+        </if>
+    </select>
+
+    <insert id="addWorkFlowListBO" parameterType="com.transing.dpmbs.integration.bo.WorkFlowListBO"
+            useGeneratedKeys="true" keyProperty="workFlowId">
+        insert into work_flow_list
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+              project_id,
+            <if test="workFlowName !=null and workFlowName != ''">
+                work_flow_name,
+            </if>
+            <if test="workFlowTemplateId !=null and workFlowTemplateId !=''" >
+                work_flow_template_id,
+            </if>
+            <if test="img !=null and img != ''">
+                img,
+            </if>
+            create_time,
+            status
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                #{projectId},
+            <if test="workFlowName !=null and workFlowName != ''">
+                #{workFlowName},
+            </if>
+            <if test="workFlowTemplateId !=null and workFlowTemplateId !=''" >
+                #{workFlowTemplateId},
+            </if>
+            <if test="img !=null and img != ''">
+                #{img},
+            </if>
+            now(),
+            5
+        </trim>
+    </insert>
+
+    <select id="getWorkFlowDetailByWorkFlowId" parameterType="java.lang.Long" resultType="com.transing.workflow.integration.bo.WorkFlowDetail">
+        select
+            flow_detail_id,work_flow_template_id,flow_id,project_id,work_flow_id,prev_flow_detail_ids,next_flow_detail_ids,type_no,quartz_time,data_source_type,
+            job_begin_time,job_end_time,job_progress,job_status,error_msg,created_by,created_time,updated_by,updated_time,result_param,node_info,is_save
+        from work_flow_detail
+        where work_flow_id = #{workFlowId}
+    </select>
+
+    <select id="getWorkFlowDetailByWorkFlowIdAndProjectId" parameterType="java.util.Map" resultType="com.transing.workflow.integration.bo.WorkFlowDetail">
+        select
+        flow_detail_id,work_flow_template_id,flow_id,project_id,work_flow_id,prev_flow_detail_ids,next_flow_detail_ids,type_no,quartz_time,data_source_type,
+        job_begin_time,job_end_time,job_progress,job_status,error_msg,created_by,created_time,updated_by,updated_time,result_param,node_info,is_save
+        from work_flow_detail
+        where work_flow_id = #{workFlowId} and project_id = #{projectId}
+    </select>
+    <select id="getWorkFlowDetailByWorkFlowIdAndProjectIds" parameterType="java.util.Map" resultType="com.transing.workflow.integration.bo.WorkFlowDetail">
+        select
+        flow_detail_id,work_flow_template_id,flow_id,project_id,work_flow_id,prev_flow_detail_ids,next_flow_detail_ids,type_no,quartz_time,data_source_type,
+        job_begin_time,job_end_time,job_progress,job_status,error_msg,created_by,created_time,updated_by,updated_time,result_param,node_info,is_save
+        from work_flow_detail
+        where work_flow_id = #{workFlowId} and project_id = #{projectId} and job_status != 5
+    </select>
+    <select id="getWorkFlowNodeParamByWorkFlowId" parameterType="java.lang.Long" resultType="com.transing.workflow.integration.bo.WorkFlowNodeParamBo">
+        select param_id,flow_detail_id,project_id,work_flow_id,type_no,param_type,created_by,created_date,updated_by,updated_date,input_param_id,input_param_cn_name,
+        input_param_type,input_param_value,config
+        FROM  work_flow_node_param
+        where work_flow_id = #{workFlowId}
+    </select>
+
+    <select id="getWorkFlowListBOByWorkFlowName" parameterType="java.util.Map" resultType="java.lang.Long">
+        select count(work_flow_id) from work_flow_list where work_flow_name = #{workFlowName} and project_id = #{projectId}
+    </select>
+
+    <delete id="delWorkFlowDetailByWorkFlowId" parameterType="java.lang.Long">
+        DELETE from work_flow_detail where work_flow_id=#{workFlowId}
+    </delete>
+
+    <delete id="delWorkFlowNodeParamByWorkFlowId" parameterType="java.lang.Long">
+        DELETE from work_flow_node_param where work_flow_id=#{workFlowId}
+    </delete>
+
+    <delete id="delWorkFlowListByWorkFlowId" parameterType="java.lang.Long">
+        DELETE from work_flow_list where work_flow_id=#{workFlowId}
+    </delete>
+
+    <select id="getDownloadCoding" resultType="com.transing.dpmbs.integration.bo.ParamBO">
+        select p.key,p.value,p.type from param as p where type = 'downloadCoding'
+    </select>
+    <update id="updateWorkFlowListStatus" parameterType="com.transing.dpmbs.integration.bo.WorkFlowListBO">
+        update work_flow_list
+        <set>
+            <if test="projectId != null and projectId != ''">
+                project_id = #{projectId},
+            </if>
+            <if test="workFlowTemplateId != null and workFlowTemplateId != ''">
+                work_flow_template_id = #{workFlowTemplateId},
+            </if>
+            <if test="workFlowName != null and workFlowName != ''">
+                work_flow_name = #{workFlowName},
+            </if>
+            <if test="status != null and status != ''">
+                status = #{status},
+            </if>
+            <if test="finishTime != null and finishTime != ''">
+                finish_time = now(),
+            </if>
+            <if test="img != null and img != ''">
+                img = #{img},
+            </if>
+            <if test="progress != null and progress != ''">
+                progress = #{progress},
+            </if>
+        </set>
+        where work_flow_id = #{workFlowId}
+    </update>
+    <select id="getWorkFlowListBOByWorkFlowId" parameterType="java.lang.Long"
+            resultType="com.transing.dpmbs.integration.bo.WorkFlowListBO">
+        select work_flow_id,project_id,work_flow_template_id,work_flow_name,create_time,finish_time,status,img,progress from work_flow_list where work_flow_id = #{workFlowId}
+    </select>
+    <select id="getFirstDetailByWorkFlowId" parameterType="java.lang.Long" resultType="com.transing.workflow.integration.bo.WorkFlowDetail">
+         SELECT flow_detail_id, flow_id, project_id, work_flow_id,quartz_time, type_no,data_source_type,prev_flow_detail_ids,next_flow_detail_ids,result_param, job_begin_time, job_end_time, job_progress, job_status,error_msg, created_by, created_time, updated_by, updated_time
+        FROM   work_flow_detail
+        where  prev_flow_detail_ids = '0'
+          and work_flow_id = #{workFlowId}
+    </select>
+
+    <update id="updateWorkFlowDetailToStopByWorkFlowId" parameterType="java.lang.Long">
+        update work_flow_detail set job_status = 4 where work_flow_id = #{workFlowId} and job_status = 0
+    </update>
+    <select id="workFlowListCount" parameterType="java.util.Map" resultType="java.lang.Long">
+        select count(work_flow_id) from work_flow_list where project_id=#{projectId}
+        <if test="status !=null and status != ''" >
+            and status=#{status}
+        </if>
+    </select>
+    <select id="getWorkFlowListByIncludeStatus" parameterType="java.util.Map" resultType="com.transing.dpmbs.integration.bo.WorkFlowListBO">
+        select work_flow_id,project_id,work_flow_template_id,work_flow_name,create_time,finish_time,status,img,progress
+        from work_flow_list
+        where project_id=#{projectId}
+        and
+        status in
+        <foreach collection="condition" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+    <update id="updateWorkFlowDetailByWorkFlowId" parameterType="java.lang.Long">
+        update work_flow_detail set job_status=1 where work_flow_id=#{workFlowId}
+    </update>
+    <update id="updateWorkFlowDetailToPreRunFinish" parameterType="java.lang.Long">
+        update work_flow_detail set job_status=6 where flow_detail_id=#{flowDetailId}
+    </update>
+    <select id="getWorkFlowDetailListByWorkFlowIdAndStatus" parameterType="java.lang.Long" resultType="com.transing.workflow.integration.bo.WorkFlowDetail">
+        SELECT flow_detail_id, flow_id, project_id, work_flow_id,quartz_time, type_no,data_source_type,prev_flow_detail_ids,next_flow_detail_ids,result_param, job_begin_time, job_end_time, job_progress, job_status,error_msg, created_by, created_time, updated_by, updated_time
+        FROM   work_flow_detail
+        where  job_status =5
+          and work_flow_id = #{workFlowId}
+    </select>
+</mapper>
